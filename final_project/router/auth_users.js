@@ -80,6 +80,35 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
 
 });
 
+// Del a book review
+regd_users.delete("/auth/review/:isbn", (req, res) => {
+    const isbn = req.params.isbn;
+    if (isbn){
+      let arrBooks = [];
+      Object.keys(books).forEach((prop, index) => { arrBooks.push(books[prop]) });
+      
+      let bookForEditIndex = arrBooks.findIndex(el => el.ISBN == isbn);
+      if (bookForEditIndex >= 0){
+          let bookForEdit = arrBooks[bookForEditIndex];
+          let newReview = {};
+          newReview.review = req.body.review;
+          let userName = req.session.authorization.username;
+        //   bookForEdit.reviews[userName] = newReview;
+          bookForEdit.reviews = Object.entries(bookForEdit.reviews).filter(([key, value]) => key !== userName)
+          let bookNumberInDB = bookForEditIndex + 1;
+          books[bookNumberInDB] = bookForEdit;
+          return res.send(bookForEdit);
+      }
+      else{
+          return res.status(208).json({ message: "There is no book with this isbn." });
+      }
+    }
+    else {
+      return res.status(208).json({ message: "Invalid isbn." });
+    }
+  
+  });
+
 module.exports.authenticated = regd_users;
 module.exports.isValid = isValid;
 module.exports.users = users;
