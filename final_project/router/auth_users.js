@@ -39,7 +39,7 @@ regd_users.post("/login", (req,res) => {
       // Generate JWT access token
       let accessToken = jwt.sign({
           data: password
-      }, 'access', { expiresIn: 60 });
+      }, 'access', { expiresIn: 3600 });
 
       // Store access token and username in session
       req.session.authorization = {
@@ -49,13 +49,35 @@ regd_users.post("/login", (req,res) => {
   } else {
       return res.status(208).json({ message: "Invalid Login. Check username and password" });
   }
-  // return res.status(300).json({message: "Yet to be implemented"});
 });
 
 // Add a book review
 regd_users.put("/auth/review/:isbn", (req, res) => {
-  //Write your code here
-  return res.status(300).json({message: "Yet to be implemented"});
+  const isbn = req.params.isbn;
+  if (isbn){
+    let arrBooks = [];
+    Object.keys(books).forEach((prop, index) => { arrBooks.push(books[prop]) });
+    
+    let bookForEditIndex = arrBooks.findIndex(el => el.ISBN == isbn);
+    if (bookForEditIndex >= 0){
+        let bookForEdit = arrBooks[bookForEditIndex];
+        let newReview = {};
+        newReview.review = req.body.review;
+        let userName = req.session.authorization.username;
+        bookForEdit.reviews[userName] = newReview;
+
+        let bookNumberInDB = bookForEditIndex + 1;
+        books[bookNumberInDB] = bookForEdit;
+        return res.send(bookForEdit);
+    }
+    else{
+        return res.status(208).json({ message: "There is no book with this isbn." });
+    }
+  }
+  else {
+    return res.status(208).json({ message: "Invalid isbn." });
+  }
+
 });
 
 module.exports.authenticated = regd_users;
