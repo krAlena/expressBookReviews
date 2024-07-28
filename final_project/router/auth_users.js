@@ -92,9 +92,10 @@ regd_users.delete("/auth/review/:isbn", (req, res) => {
           let bookForEdit = arrBooks[bookForEditIndex];
           let newReview = {};
           newReview.review = req.body.review;
+
           let userName = req.session.authorization.username;
-        //   bookForEdit.reviews[userName] = newReview;
           bookForEdit.reviews = Object.entries(bookForEdit.reviews).filter(([key, value]) => key !== userName)
+          
           let bookNumberInDB = bookForEditIndex + 1;
           books[bookNumberInDB] = bookForEdit;
           return res.send(bookForEdit);
